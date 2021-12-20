@@ -1,10 +1,5 @@
-local rednet = rednet
-local redstone  = redstone
-local settings = settings
-local peripheral = peripheral
-local parallel = parallel
-local term = term
-local os = os
+shell.execute("rm", "startup.lua")
+shell.execute("wget", "https://raw.githubusercontent.com/CogentRedTester/computercraft-scripts/master/wireless-redstone.lua", "startup.lua")
 
 local opts = {
     id = "",
