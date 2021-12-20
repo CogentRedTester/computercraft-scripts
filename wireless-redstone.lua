@@ -76,10 +76,10 @@ local function configuration()
     clearScreen()
     print("Your settings are:")
     print()
-    print("ID: ", id)
-    print("ROLE: ", role == ROLE.SENDING and "sender" or "receiver")
-    print("SIDE: ", side)
-    if role == ROLE.RECEIVING then print("MODE:", mode == MODE.ANALOGUE and "analogue" or "digital") end
+    print("ID:  ", id)
+    print("ROLE ", role == ROLE.SENDING and "sender" or "receiver")
+    print("SIDE ", side)
+    if role == ROLE.RECEIVING then print("MODE ", mode == MODE.ANALOGUE and "analogue" or "digital") end
 
     print()
     print("Press ENTER to finish setup")
