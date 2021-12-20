@@ -176,7 +176,7 @@ local function driver()
         table.insert(threads, receivingDriver)
     end
 
-    parallel.waitForAny(threads.unpack())
+    parallel.waitForAny(unpack(threads))
 end
 
 settings.load(".wireless_settings")

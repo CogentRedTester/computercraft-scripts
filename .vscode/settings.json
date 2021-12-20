@@ -1,0 +1,14 @@
+{
+    "Lua.diagnostics.globals": [
+        "redstone",
+        "sleep",
+        "colors",
+        "term",
+        "rednet",
+        "settings",
+        "peripheral",
+        "parallel",
+        "shell"
+    ],
+    "Lua.runtime.version": "Lua 5.1"
+}
