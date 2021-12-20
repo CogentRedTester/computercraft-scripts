@@ -136,7 +136,7 @@ local function sendingDriver()
     end
 
     local function timeout()
-        sleep(20)
+        sleep(15)
     end
 
     while true do
@@ -154,7 +154,7 @@ local function receivingDriver()
     query()
 
     while true do
-        local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 22)
+        local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 16)
         if not source then
             signal_strength = 0
             drawStatus("no senders found")
