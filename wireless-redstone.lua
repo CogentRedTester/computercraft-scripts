@@ -186,9 +186,11 @@ local function modemConnect()
     end
 end
 
+--when a modem is disconnected immediately update the status and stop outputting signals
 local function modemDisconnect()
     while true do
         os.pullEvent("peripheral_detach")
+        if not rednet.isOpen() and opts.role == ROLE.RECEIVING then redstone.setAnalogueOutput(opts.side, 0) end
         drawStatus()
     end
 end
