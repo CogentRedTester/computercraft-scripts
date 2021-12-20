@@ -148,7 +148,11 @@ local function receivingDriver()
             signal_strength = 0
             drawStatus("no senders found")
         else
-            drawStatus("receiving - strength "..signal_strength)
+            if opts.mode == MODE.ANALOGUE then
+                drawStatus("receiving - strength "..signal_strength)
+            else
+                drawStatus("receiving - signal "..(signal_strength == 0 and "off" or "on"))
+            end
         end
 
         if opts.mode == MODE.ANALOGUE then
