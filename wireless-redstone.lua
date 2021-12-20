@@ -151,6 +151,7 @@ end
 --the receiving computer waits to receive update messages
 --the current assumption is that there is only a single sender
 local function receivingDriver()
+    drawStatus("waiting for senders")
     query()
 
     while true do
@@ -207,6 +208,7 @@ local function driver()
         table.insert(threads, receivingDriver)
     end
 
+    drawStatus("starting")
     parallel.waitForAny(unpack(threads))
 end
 
