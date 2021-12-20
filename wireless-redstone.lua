@@ -187,7 +187,7 @@ end
 
 local function modemDisconnect()
     while true do
-        os.pullEvent("peripheral_detatch")
+        os.pullEvent("peripheral_detach")
         drawStatus()
     end
 end
