@@ -132,7 +132,7 @@ local function sendingDriver()
     end
 
     local function timeout()
-        sleep(10)
+        sleep(20)
     end
 
     while true do
@@ -146,7 +146,7 @@ local function receivingDriver()
     rednet.broadcast("", PROTOCOL_SRING..opts.id.."/query")
 
     while true do
-        local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 11)
+        local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 22)
         if not source then
             signal_strength = 0
             drawStatus("no senders found")
@@ -167,11 +167,18 @@ local function receivingDriver()
 end
 
 --reconnects to any modems connected during runtime
-local function modemDriver()
+local function modemConnect()
     while true do
         os.pullEvent("peripheral")
         peripheral.find("modem", rednet.open)
         drawStatus("modem connected")
+    end
+end
+
+local function modemDisconnect()
+    while true do
+        os.pullEvent("peripheral_detatch")
+        if not rednet.isOpen() then drawStatus("modem disconnected") end
     end
 end
 
@@ -181,7 +188,7 @@ local function driver()
     end
     peripheral.find("modem", rednet.open)
 
-    local threads = {modemDriver}
+    local threads = {modemConnect, modemDisconnect}
 
     if opts.role == ROLE.SENDING then
         table.insert(threads, sendingDriver)
