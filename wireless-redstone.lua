@@ -123,6 +123,8 @@ local function sendingDriver()
     local function sendUpdate()
         local signal = redstone.getAnalogueInput(opts.side)
         rednet.broadcast(signal, PROTOCOL_SRING..opts.id)
+
+        drawStatus("broadcasting - strength "..signal)
         os.pullEvent("redstone")
     end
 
@@ -142,7 +144,12 @@ local function receivingDriver()
 
     while true do
         local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 11)
-        if not source then signal_strength = 0 end
+        if not source then
+            signal_strength = 0
+            drawStatus("no senders found")
+        else
+            drawStatus("receiving - strength "..signal_strength)
+        end
 
         if opts.mode == MODE.ANALOGUE then
             redstone.setAnalogueOutput(opts.side, signal_strength)
