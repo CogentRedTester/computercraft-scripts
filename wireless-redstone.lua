@@ -122,12 +122,16 @@ local function queryDriver()
     end
 end
 
+local function broadcast()
+    local signal = redstone.getAnalogueInput(opts.side)
+    rednet.broadcast(signal, PROTOCOL_SRING..opts.id)
+
+    drawStatus("broadcasting - strength "..signal)
+end
+
 local function sendingDriver()
     local function sendUpdate()
-        local signal = redstone.getAnalogueInput(opts.side)
-        rednet.broadcast(signal, PROTOCOL_SRING..opts.id)
-
-        drawStatus("broadcasting - strength "..signal)
+        broadcast()
         os.pullEvent("redstone")
     end
 
@@ -140,10 +144,14 @@ local function sendingDriver()
     end
 end
 
+local function query()
+    rednet.broadcast("", PROTOCOL_SRING..opts.id.."/query")
+end
+
 --the receiving computer waits to receive update messages
 --the current assumption is that there is only a single sender
 local function receivingDriver()
-    rednet.broadcast("", PROTOCOL_SRING..opts.id.."/query")
+    query()
 
     while true do
         local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 22)
@@ -172,13 +180,15 @@ local function modemConnect()
         os.pullEvent("peripheral")
         peripheral.find("modem", rednet.open)
         drawStatus("modem connected")
+        if opts.role == ROLE.RECEIVING then query()
+        else broadcast() end
     end
 end
 
 local function modemDisconnect()
     while true do
         os.pullEvent("peripheral_detatch")
-        if not rednet.isOpen() then drawStatus("modem disconnected") end
+        drawStatus()
     end
 end
 
