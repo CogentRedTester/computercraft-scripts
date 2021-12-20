@@ -118,7 +118,7 @@ end
 local function queryDriver()
     while true do
         local source = rednet.receive(PROTOCOL_SRING..opts.id.."/query")
-        rednet.send(source, redstone.getAnalogueInput(opts.side))
+        rednet.send(source, redstone.getAnalogueInput(opts.side), PROTOCOL_SRING..opts.id)
     end
 end
 
