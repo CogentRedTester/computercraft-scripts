@@ -92,7 +92,9 @@ local function configuration()
     settings.set("first_run", true)
 end
 
-local function drawStatus()
+local function drawStatus(status)
+    if not rednet.isOpen() then status = "No Modem" end
+
     clearScreen()
     print("RedTester's Wireless Redstone Protocol")
     print("--------------------------------------")
@@ -102,10 +104,11 @@ local function drawStatus()
     print("SIDE:", opts.side)
     if opts.role == ROLE.RECEIVING then print("MODE:", opts.mode == MODE.ANALOGUE and "analogue" or "digital") end
     print()
-    print("STATUS:", STATUS)
+    print("STATUS:", status)
 end
 
 local function handleInput()
+
 end
 
 --sending computers will respond with the redstone level if queried by a receiver
@@ -127,19 +130,34 @@ local function sendingDriver()
         sleep(10)
     end
 
-    parallel.waitForAny(sendUpdate, timeout)
+    while true do
+        parallel.waitForAny(sendUpdate, timeout)
+    end
 end
 
 --the receiving computer waits to receive update messages
 --the current assumption is that there is only a single sender
 local function receivingDriver()
-    local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 11)
-    if not source then signal_strength = 0 end
+    rednet.broadcast("", PROTOCOL_SRING..opts.id.."/query")
 
-    if opts.mode == MODE.ANALOGUE then
-        redstone.setAnalogueOutput(opts.side, signal_strength)
-    else
-        redstone.setAnalogueOutput(opts.side, signal_strength == 0 and 0 or 15)
+    while true do
+        local source, signal_strength = rednet.receive(PROTOCOL_SRING..opts.id, 11)
+        if not source then signal_strength = 0 end
+
+        if opts.mode == MODE.ANALOGUE then
+            redstone.setAnalogueOutput(opts.side, signal_strength)
+        else
+            redstone.setAnalogueOutput(opts.side, signal_strength == 0 and 0 or 15)
+        end
+    end
+end
+
+--reconnects to any modems connected during runtime
+local function modemDriver()
+    while true do
+        os.pullEvent("peripheral")
+        peripheral.find("modem", rednet.open)
+        drawStatus("modem connected")
     end
 end
 
@@ -147,24 +165,18 @@ local function driver()
     for key, _ in pairs(opts) do
         opts[key] = settings.get(key)
     end
-
-    local driver_fn
     peripheral.find("modem", rednet.open)
 
+    local threads = {modemDriver}
+
     if opts.role == ROLE.SENDING then
-        driver_fn = sendingDriver
+        table.insert(threads, sendingDriver)
+        table.insert(threads, queryDriver)
     elseif opts.role == ROLE.RECEIVING then
-        driver_fn = receivingDriver
-        rednet.broadcast(PROTOCOL_SRING..opts.id.."/query")
+        table.insert(threads, receivingDriver)
     end
 
-    while true do
-        if not rednet.isOpen() then STATUS = "No Modem" end
-
-        drawStatus()
-        handleInput()
-        driver_fn()
-    end
+    parallel.waitForAny(threads.unpack())
 end
 
 settings.load(".wireless_settings")
@@ -173,8 +185,4 @@ if settings.get("first_run") == nil then
     settings.save(".wireless_settings")
 end
 
-if opts.role == ROLE.RECEIVING then
-    parallel.waitForAny(driver, queryDriver)
-else
-    driver()
-end
+driver()
